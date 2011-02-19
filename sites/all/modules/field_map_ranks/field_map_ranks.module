@@ -1,0 +1,348 @@
+<?php
+/**
+ * This file implements a custom field type for CUED site.
+ * @author robert "atomicus' labus <robert.labus@gmail.com>
+ * @package CUED
+ */
+
+/**
+ * Implements hook_help().
+ */
+function field_map_ranks_help($path, $arg)
+{
+  switch ($path)
+  {
+    case 'admin/help#field_map_ranks':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The field_map_ranks module defines various numeric field types for the Field module. field_map_rankss can be in integer, decimal, or floating-point form, and they can be formatted when displayed. field_map_ranks fields can be limited to a specific set of input values or to a range of values. See the <a href="@field-help">Field module help page</a> for more information about fields.', array('@field-help' => url('admin/help/field'))) . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_field_info().
+ */
+function field_map_ranks_field_info()
+{
+  return array(
+          'field_map_ranks' => array(
+                  'label' => t('Map rank'),
+                  'description' => t('This field stores a field_map_ranks in the database as an integer.'),
+                  'instance_settings' => array('min' => '', 'max' => '', 'prefix' => '', 'suffix' => ''),
+                  'default_widget' => 'field_map_ranks_widget',
+                  'default_formatter' => 'field_map_ranks_formater',
+                  'behaviors' => array('multiple values' =>  FIELD_BEHAVIOR_CUSTOM,
+                          'default value' => FIELD_BEHAVIOR_DEFAULT),
+          ),
+  );
+}
+
+/**
+ * Implements hook_field_schema().
+ */
+function field_map_ranks_field_schema($field)
+{
+  switch ($field['type'])
+  {
+    case 'field_map_ranks' :
+      $columns = array(
+              'value_idea' => array(
+                      'type' => 'int',
+                      'not null' => FALSE
+              ),
+              'value_arch' => array(
+                      'type' => 'int',
+                      'not null' => FALSE
+              ),
+              'value_game' => array(
+                      'type' => 'int',
+                      'not null' => FALSE
+              ),
+              'value_clim' => array(
+                      'type' => 'int',
+                      'not null' => FALSE
+              ),
+              'value_bots' => array(
+                      'type' => 'int',
+                      'not null' => FALSE
+              ),
+              'value_avg' => array(
+                      'type' => 'numeric',
+                      'not null' => FALSE,
+                      'precision' => 11,
+                      'scale' => 2,
+              ),
+      );
+      return array(
+              'columns' => $columns,
+      );
+      break;
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function field_map_ranks_field_is_empty($item, $field)
+{
+  if (empty($item) && (string) $item !== '0')
+  {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * Module currently supports 2 types of display formats:
+ * Default  - a full, simple table with all marks & avarage displayed
+ * Teaser   - only avarage score is displayed
+ */
+function field_map_ranks_field_formatter_info()
+{
+  return array(
+          'field_map_ranks_formater' => array(
+                  'label' => t('Default full vie'),
+                  'field types' => array('field_map_ranks'),
+          ),
+          'field_map_ranks_teaser' => array(
+                  'label' => t('teaser'),
+                  'field types' => array('field_map_ranks'),
+          ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ *
+ * Prepares data for view formatters.
+ */
+function field_map_ranks_field_formatter_view($object_type, $object, $field, $instance,
+        $langcode, $items, $display)
+{
+  $element = array();
+  if($display['type']=='field_map_ranks_formater')
+  {
+    $element['#theme'] = 'field_map_ranks_view';
+    foreach ($items[0] as $delta => $item)
+    {
+      $element[$delta] =array(
+              '#data'  =>  $item,
+              '#label' =>  _field_map_ranks_translate($delta),
+      );
+    }
+  }
+  if($display['type']=='field_map_ranks_teaser')
+  {
+    $element['#theme'] = 'field_map_ranks_teaser';
+    foreach ($items[0] as $delta => $item)
+    {
+      $element[$delta] =array(
+              '#data'  =>  $item,
+              '#label' =>  _field_map_ranks_translate($delta),
+      );
+    }
+  }
+  return $element;
+}
+function field_map_ranks_field_block()
+{
+
+}
+/**
+ * Implements hook_field_widget_info().
+ */
+function field_map_ranks_field_widget_info()
+{
+  return array(
+          'field_map_ranks_formater_widget' => array(
+                  'label' => t('Map rank widget'),
+                  'field types' => array('field_map_ranks'),
+                  'behaviors' => array('multiple values' =>  FIELD_BEHAVIOR_DEFAULT,
+                          'default value' => FIELD_BEHAVIOR_DEFAULT),
+          )
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function field_map_ranks_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element)
+{
+  foreach($element['#columns'] as $key => $column)
+  {
+
+    $value = isset($items[$delta][$column]) ? $items[$delta][$column]: '1';
+    $fields[$column]=
+            array(
+            '#title' => _field_map_ranks_translate($column),
+            '#type' => 'textfield',
+            '#default_value' => $value,
+            '#field_name' =>$column,
+            '#column' =>$column,
+            '#size' =>2,
+            '#maxlength' => 2,
+    );
+    if($column == 'value_avg')
+    {
+      $fields[$column]['#disabled'] = true;
+    }
+    
+  }
+  //$form['#theme'] = 'field_map_ranks';
+
+  return $fields;
+}
+function field_map_ranks_init(){
+
+}
+function field_map_ranks_field_widget_error($element, $error, $form, &$form_state)
+{
+  form_error($element[$error[0]['name']], $error[0]['message']);
+}
+/**
+ * Implements hook_field_validate
+ *
+ * @param <type> $entity_type
+ * @param <type> $entity
+ * @param <type> $field
+ * @param <type> $instance
+ * @param <type> $langcode
+ * @param <type> $items
+ * @param <type> $errors
+ */
+function field_map_ranks_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors)
+{
+  if(empty ($items))
+  {
+    return 0;
+  }
+  foreach($items[0] as $delta => $item)
+  {
+    if (empty($item) && (string) $item !== '0')
+    {
+      $errors[$field['field_name']][$langcode][0][$delta][] = array(
+              'error' => 'field_map_ranks_text_empty',
+              'name'  =>  $delta,
+              'message' => t('%name: The value cannot be empty.', array('%name' => $delta)),
+      );
+    }
+    elseif(!is_numeric($item) || 0 >$item || $item > 10)
+    {
+      $errors[$field['field_name']][$langcode][0][$delta][] = array(
+              'error' => 'field_map_ranks_invalid_value',
+              'name'  =>  $delta,
+              'message' => t('%name: The value must be integer in range 0 to 10.', array('%name' => _field_map_ranks_translate($delta)))
+      );
+    }
+  }
+}
+/**
+ * Some small helper.
+ * Translates given machina column name $name to human-readable name.
+ *
+ * @param <type> $name
+ * @return <type>
+ */
+function _field_map_ranks_translate($name)
+{
+  $a=array();
+  $a['value_idea'] = "Idea";
+  $a['value_arch'] = 'Architecture';
+  $a['value_game'] = 'Gameplay';
+  $a['value_clim'] = 'Feel';
+  $a['value_bots'] = 'Bots';
+  $a['value_avg']  = 'Avarage';
+
+  return t($a[$name]);
+}
+/**
+ * Implements presave hook
+ *
+ * Calculates avarage of all marks, and stores it in proper column.
+ *
+ * @param <type> $entity_type
+ * @param <type> $entity
+ * @param <type> $field
+ * @param <type> $instance
+ * @param <type> $langcode
+ * @param <type> $items
+ */
+function field_map_ranks_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items)
+{
+
+  if ($field['type'] == 'field_map_ranks' && (!empty($items)))
+  {
+    $avg = 0.0;
+    $i = 0.0;
+    //set avg
+    foreach($items[0] as $item => $value)
+    {
+      if($item != 'value_avg')
+      {
+        $avg += $value;
+        $i++;
+      }
+
+    }
+    $items[0]['value_avg'] = round($avg/$i,2);
+
+  }
+}
+/**
+ * Implements hook_theme.
+ * @return <type>
+ */
+function field_map_ranks_theme()
+{
+  return array(
+          'field_map_ranks' => array(
+                  'render element' => 'element',
+                  'template' => 'field',
+                  'preprocess functions' => array('template_preprocess_field'),
+          ),
+          'field_map_ranks_view' => array(
+                  'render element' => 'element',
+                  'template' => 'field_map_ranks_view',
+          ),
+          'field_map_ranks_teaser' => array(
+                  'render element' => 'element',
+                  'template' => 'field_map_ranks_teaser',
+          ),
+  );
+}
+
+/**
+ * this is not used now.
+ *
+ * @param <type> $variables
+ * @return <type>
+ */
+function theme_field_map_ranks($variables)
+{
+  $output = '';
+  // Render the label, if it's not hidden.
+  if (!$variables['label_hidden'])
+  {
+    $output .= '<div class="field-label"' . $variables['title_attributes'] . '>' . $variables['label'] . ':&nbsp;</div>';
+  }
+  // Render the items.
+  $output .= '<div class="field-items"' . $variables['content_attributes'] . '>';
+  foreach ($variables['fields'] as $delta => $item)
+  {
+    $classes = 'field-item ' . ($delta % 2 ? 'odd' : 'even');
+    $output .= '<div class="' . $classes . '"' . $variables['item_attributes'][$delta] . '>' . drupal_render($item) . 'asaas</div>';
+  }
+  $output .= '</div>';
+  // Render the top-level DIV.
+  $output = '<div class="' . $variables['classes'] . '"' . $variables['attributes'] . '>' . $output . '</div>';
+  return $output;
+}
+
+
+
+
+
+

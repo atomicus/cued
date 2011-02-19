@@ -1,0 +1,14 @@
+; $Id: field_ui.info,v 1.2 2009/11/02 03:41:58 webchick Exp $
+name = Map ranks fields
+description = Custom field for saving map ranks
+package = CUED
+version = 0.1
+core = 7.x
+files[] = field_map_ranks.module
+stylesheets[all][] = field_map_ranks.css
+
+; Information added by drupal.org packaging script on 2010-05-23
+version = "7.0-alpha5"
+project = "drupal"
+datestamp = "1274628610"
+

@@ -1,0 +1,29 @@
+/* 
+    Document   : field_map_ranks
+    Created on : 2010-07-11, 23:34:41
+    Author     : Atom
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+div.field-type-field-map-ranks div
+{
+ 
+}
+.field-type-field-map-ranks .form-item
+{
+
+ width:15%;
+ float:left;
+ height:50px;
+}
+#field-map-ranks-add-more-wrapper{
+  clear:both;
+  height:70px;
+  width:100%;
+}
